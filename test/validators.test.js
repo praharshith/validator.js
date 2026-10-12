@@ -2020,6 +2020,20 @@ describe('Validators', () => {
     });
   });
 
+  it('should use ASCII-safe Unicode escapes for el-GR alpha regex (issue #117)', () => {
+    // Literal Greek characters in regex ranges cause SyntaxError in browsers when the page
+    // charset is not UTF-8. Using \uXXXX escapes is always safe regardless of charset.
+    const src = fs.readFileSync(require.resolve('../src/lib/alpha.js'), 'utf8');
+    assert.ok(
+      /el-GR.*\\u0391-\\u03CE/.test(src),
+      'el-GR alpha regex should use Unicode escapes \\u0391-\\u03CE, not literal Greek chars'
+    );
+    assert.ok(
+      !/el-GR.*[\u0391-\u03CE]/.test(src),
+      'el-GR alpha regex must not contain literal Greek characters in character class range'
+    );
+  });
+
   it('should validate Hebrew alpha strings', () => {
     test({
       validator: 'isAlpha',
@@ -2858,6 +2872,15 @@ describe('Validators', () => {
         'jαckγ',
       ],
     });
+  });
+
+  it('should use ASCII-safe Unicode escapes for el-GR alphanumeric regex (issue #117)', () => {
+    // Same as alpha: literal Greek chars in regex ranges break in browsers without UTF-8 charset.
+    const src = fs.readFileSync(require.resolve('../src/lib/alpha.js'), 'utf8');
+    assert.ok(
+      /el-GR.*\\u0391-\\u03C9/.test(src),
+      'el-GR alphanumeric regex should use Unicode escapes \\u0391-\\u03C9, not literal Greek chars'
+    );
   });
 
   it('should validate Hebrew alphanumeric strings', () => {
